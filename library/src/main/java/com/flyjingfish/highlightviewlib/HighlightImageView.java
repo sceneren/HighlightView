@@ -3,6 +3,8 @@ package com.flyjingfish.highlightviewlib;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.os.Handler;
+import android.os.Message;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -13,6 +15,20 @@ import androidx.appcompat.widget.AppCompatImageView;
 public class HighlightImageView extends AppCompatImageView implements HighlightView, HighlightDrawView, AnimHolder {
     private final HighlightAnimHolder mHighlightAnimHolder = new HighlightAnimHolder(this, this);
     private final HighlightDraw mHighlightDraw = new HighlightDraw(this);
+
+    private Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            super.handleMessage(msg);
+            try {
+                invalidate();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        }
+    };
+
 
     public HighlightImageView(@NonNull Context context) {
         this(context, null);
@@ -33,7 +49,11 @@ public class HighlightImageView extends AppCompatImageView implements HighlightV
         super.onDraw(canvas);
 
         mHighlightDraw.onDraw(canvas);
-        super.onDraw(canvas);
+        if (mHandler != null) {
+            mHandler.sendEmptyMessage(100);
+        }
+
+
     }
 
     @Override
@@ -61,5 +81,12 @@ public class HighlightImageView extends AppCompatImageView implements HighlightV
     protected void drawableStateChanged() {
         super.drawableStateChanged();
         mHighlightAnimHolder.drawableStateChanged();
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        mHandler.removeCallbacksAndMessages(null);
+        mHandler = null;
     }
 }
